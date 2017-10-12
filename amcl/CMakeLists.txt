@@ -3,6 +3,7 @@ project(amcl)
 
 find_package(catkin REQUIRED
         COMPONENTS
+            rosbag
             roscpp
             tf
             dynamic_reconfigure
@@ -18,6 +19,7 @@ generate_dynamic_reconfigure_options(
 
 catkin_package(
     CATKIN_DEPENDS
+        rosbag
         roscpp
         dynamic_reconfigure
         tf
@@ -121,6 +123,7 @@ if(CATKIN_ENABLE_TESTING)
 
   # Tests
   add_rostest(test/set_initial_pose.xml)
+  add_rostest(test/set_initial_pose_delayed.xml)
   add_rostest(test/basic_localization_stage.xml)
   add_rostest(test/small_loop_prf.xml)
   add_rostest(test/small_loop_crazy_driving_prg.xml)
