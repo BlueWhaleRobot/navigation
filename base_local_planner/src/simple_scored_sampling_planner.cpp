@@ -40,7 +40,7 @@
 #include <ros/console.h>
 
 namespace base_local_planner {
-  
+
   SimpleScoredSamplingPlanner::SimpleScoredSamplingPlanner(std::vector<TrajectorySampleGenerator*> gen_list, std::vector<TrajectoryCostFunction*>& critics, int max_samples) {
     max_samples_ = max_samples;
     gen_list_ = gen_list;
@@ -63,6 +63,7 @@ namespace base_local_planner {
       }
       if (cost != 0) {
         cost *= score_function_p->getScale();
+        //ROS_INFO("scale :%f",score_function_p->getScale());
       }
       traj_cost += cost;
       if (best_traj_cost > 0) {
@@ -84,13 +85,19 @@ namespace base_local_planner {
     double loop_traj_cost, best_traj_cost = -1;
     bool gen_success;
     int count, count_valid;
+
+    //ros::WallTime time1_temp = ros::WallTime::now();
     for (std::vector<TrajectoryCostFunction*>::iterator loop_critic = critics_.begin(); loop_critic != critics_.end(); ++loop_critic) {
       TrajectoryCostFunction* loop_critic_p = *loop_critic;
+      // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
+      // ROS_INFO("findBestTrajectory time: %.9f\n", time2_temp.toSec());
       if (loop_critic_p->prepare() == false) {
         ROS_WARN("A scoring function failed to prepare");
         return false;
       }
     }
+
+
 
     for (std::vector<TrajectorySampleGenerator*>::iterator loop_gen = gen_list_.begin(); loop_gen != gen_list_.end(); ++loop_gen) {
       count = 0;
@@ -118,8 +125,9 @@ namespace base_local_planner {
         count++;
         if (max_samples_ > 0 && count >= max_samples_) {
           break;
-        }        
+        }
       }
+
       if (best_traj_cost >= 0) {
         traj.xv_ = best_traj.xv_;
         traj.yv_ = best_traj.yv_;
@@ -132,14 +140,18 @@ namespace base_local_planner {
           traj.addPoint(px, py, pth);
         }
       }
+      // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
+      // ROS_INFO("findBestTrajectory time: %.9f\n", time2_temp.toSec());
+
       ROS_DEBUG("Evaluated %d trajectories, found %d valid", count, count_valid);
       if (best_traj_cost >= 0) {
         // do not try fallback generators
         break;
       }
     }
+
     return best_traj_cost >= 0;
   }
 
-  
+
 }// namespace

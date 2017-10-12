@@ -40,6 +40,7 @@
 #include <cmath>
 
 #include <base_local_planner/velocity_iterator.h>
+#include <ros/console.h>
 
 namespace base_local_planner {
 
@@ -87,32 +88,49 @@ void SimpleTrajectoryGenerator::initialise(
     //compute the feasible velocity space based on the rate at which we run
     Eigen::Vector3f max_vel = Eigen::Vector3f::Zero();
     Eigen::Vector3f min_vel = Eigen::Vector3f::Zero();
+    // there is no point in overshooting the goal, and it also may break the
+    // robot behavior, so we limit the velocities to those that do not overshoot in sim_time
+    double dist = hypot(goal[0] - pos[0], goal[1] - pos[1]);
+    max_vel_x = std::max(std::min(max_vel_x, dist / sim_time_), min_vel_x);
+    max_vel_y = std::max(std::min(max_vel_y, dist / sim_time_), min_vel_y);
 
-    if ( ! use_dwa_) {
-      // there is no point in overshooting the goal, and it also may break the
-      // robot behavior, so we limit the velocities to those that do not overshoot in sim_time
-      double dist = hypot(goal[0] - pos[0], goal[1] - pos[1]);
-      max_vel_x = std::max(std::min(max_vel_x, dist / sim_time_), min_vel_x);
-      max_vel_y = std::max(std::min(max_vel_y, dist / sim_time_), min_vel_y);
+    // if we use continous acceleration, we can sample the max velocity we can reach in sim_time_
+    max_vel[0] = std::min(max_vel_x, vel[0] + acc_lim[0] * sim_time_);
+    max_vel[1] = std::min(max_vel_y, vel[1] + acc_lim[1] * sim_time_);
+    max_vel[2] = std::min(max_vel_th, vel[2] + acc_lim[2] * sim_time_);
 
-      // if we use continous acceleration, we can sample the max velocity we can reach in sim_time_
-      max_vel[0] = std::min(max_vel_x, vel[0] + acc_lim[0] * sim_time_);
-      max_vel[1] = std::min(max_vel_y, vel[1] + acc_lim[1] * sim_time_);
-      max_vel[2] = std::min(max_vel_th, vel[2] + acc_lim[2] * sim_time_);
+    min_vel[0] = std::max(min_vel_x, vel[0] - acc_lim[0] * sim_time_);
+    min_vel[1] = std::max(min_vel_y, vel[1] - acc_lim[1] * sim_time_);
+    min_vel[2] = std::max(min_vel_th, vel[2] - acc_lim[2] * sim_time_);
 
-      min_vel[0] = std::max(min_vel_x, vel[0] - acc_lim[0] * sim_time_);
-      min_vel[1] = std::max(min_vel_y, vel[1] - acc_lim[1] * sim_time_);
-      min_vel[2] = std::max(min_vel_th, vel[2] - acc_lim[2] * sim_time_);
-    } else {
-      // with dwa do not accelerate beyond the first step, we only sample within velocities we reach in sim_period
-      max_vel[0] = std::min(max_vel_x, vel[0] + acc_lim[0] * sim_period_);
-      max_vel[1] = std::min(max_vel_y, vel[1] + acc_lim[1] * sim_period_);
-      max_vel[2] = std::min(max_vel_th, vel[2] + acc_lim[2] * sim_period_);
-
-      min_vel[0] = std::max(min_vel_x, vel[0] - acc_lim[0] * sim_period_);
-      min_vel[1] = std::max(min_vel_y, vel[1] - acc_lim[1] * sim_period_);
-      min_vel[2] = std::max(min_vel_th, vel[2] - acc_lim[2] * sim_period_);
-    }
+    // if ( ! use_dwa_) {
+    //   ROS_INFO("no DWA\n");
+    //   // there is no point in overshooting the goal, and it also may break the
+    //   // robot behavior, so we limit the velocities to those that do not overshoot in sim_time
+    //   double dist = hypot(goal[0] - pos[0], goal[1] - pos[1]);
+    //   max_vel_x = std::max(std::min(max_vel_x, dist / sim_time_), min_vel_x);
+    //   max_vel_y = std::max(std::min(max_vel_y, dist / sim_time_), min_vel_y);
+    //
+    //   // if we use continous acceleration, we can sample the max velocity we can reach in sim_time_
+    //   max_vel[0] = std::min(max_vel_x, vel[0] + acc_lim[0] * sim_time_);
+    //   max_vel[1] = std::min(max_vel_y, vel[1] + acc_lim[1] * sim_time_);
+    //   max_vel[2] = std::min(max_vel_th, vel[2] + acc_lim[2] * sim_time_);
+    //
+    //   min_vel[0] = std::max(min_vel_x, vel[0] - acc_lim[0] * sim_time_);
+    //   min_vel[1] = std::max(min_vel_y, vel[1] - acc_lim[1] * sim_time_);
+    //   min_vel[2] = std::max(min_vel_th, vel[2] - acc_lim[2] * sim_time_);
+    // } else {
+    //   ROS_INFO("use DWA\n");
+    //
+    //   // with dwa do not accelerate beyond the first step, we only sample within velocities we reach in sim_period
+    //   max_vel[0] = std::min(max_vel_x, vel[0] + acc_lim[0] * sim_period_);
+    //   max_vel[1] = std::min(max_vel_y, vel[1] + acc_lim[1] * sim_period_);
+    //   max_vel[2] = std::min(max_vel_th, vel[2] + acc_lim[2] * sim_period_);
+    //
+    //   min_vel[0] = std::max(min_vel_x, vel[0] - acc_lim[0] * sim_period_);
+    //   min_vel[1] = std::max(min_vel_y, vel[1] - acc_lim[1] * sim_period_);
+    //   min_vel[2] = std::max(min_vel_th, vel[2] - acc_lim[2] * sim_period_);
+    // }
 
     Eigen::Vector3f vel_samp = Eigen::Vector3f::Zero();
     VelocityIterator x_it(min_vel[0], max_vel[0], vsamples[0]);
@@ -190,6 +208,7 @@ bool SimpleTrajectoryGenerator::generateTrajectory(
 
   // make sure that the robot would at least be moving with one of
   // the required minimum velocities for translation and rotation (if set)
+
   if ((limits_->min_trans_vel >= 0 && vmag + eps < limits_->min_trans_vel) &&
       (limits_->min_rot_vel >= 0 && fabs(sample_target_vel[2]) + eps < limits_->min_rot_vel)) {
     return false;
@@ -198,6 +217,7 @@ bool SimpleTrajectoryGenerator::generateTrajectory(
   if (limits_->max_trans_vel >=0 && vmag - eps > limits_->max_trans_vel) {
     return false;
   }
+
 
   int num_steps;
   if (discretize_by_time_) {

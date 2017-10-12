@@ -116,18 +116,20 @@ namespace dwa_local_planner {
       {
         odom_helper_.setOdomTopic( odom_topic_ );
       }
-      
-      initialized_ = true;
 
+      initialized_ = true;
+      //ROS_INFO("get you 1..... !");
       dsrv_ = new dynamic_reconfigure::Server<DWAPlannerConfig>(private_nh);
       dynamic_reconfigure::Server<DWAPlannerConfig>::CallbackType cb = boost::bind(&DWAPlannerROS::reconfigureCB, this, _1, _2);
+      //ROS_INFO("get you 2..... !");
       dsrv_->setCallback(cb);
+      //ROS_INFO("get you 3..... !");
     }
     else{
       ROS_WARN("This planner has already been initialized, doing nothing.");
     }
   }
-  
+
   bool DWAPlannerROS::setPlan(const std::vector<geometry_msgs::PoseStamped>& orig_global_plan) {
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
@@ -193,9 +195,15 @@ namespace dwa_local_planner {
     //compute what trajectory to drive along
     tf::Stamped<tf::Pose> drive_cmds;
     drive_cmds.frame_id_ = costmap_ros_->getBaseFrameID();
-    
+
     // call with updated footprint
+    //ros::WallTime time1_temp = ros::WallTime::now();
+
     base_local_planner::Trajectory path = dp_->findBestPath(global_pose, robot_vel, drive_cmds, costmap_ros_->getRobotFootprint());
+
+    //ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
+    //ROS_INFO("findBestPath time: %.9f\n", time2_temp.toSec());
+
     //ROS_ERROR("Best: %.2f, %.2f, %.2f, %.2f", path.xv_, path.yv_, path.thetav_, path.cost_);
 
     /* For timing uncomment
@@ -221,7 +229,7 @@ namespace dwa_local_planner {
       return false;
     }
 
-    ROS_DEBUG_NAMED("dwa_local_planner", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.", 
+    ROS_DEBUG_NAMED("dwa_local_planner", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.",
                     cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z);
 
     // Fill out the local plan
@@ -272,12 +280,15 @@ namespace dwa_local_planner {
     dp_->updatePlanAndLocalCosts(current_pose_, transformed_plan);
 
     if (latchedStopRotateController_.isPositionReached(&planner_util_, current_pose_)) {
+      //if move ahead,do this
       //publish an empty plan because we've reached our goal position
       std::vector<geometry_msgs::PoseStamped> local_plan;
       std::vector<geometry_msgs::PoseStamped> transformed_plan;
       publishGlobalPlan(transformed_plan);
       publishLocalPlan(local_plan);
       base_local_planner::LocalPlannerLimits limits = planner_util_.getCurrentLimits();
+      //ROS_INFO("get you!");
+
       return latchedStopRotateController_.computeVelocityCommandsStopRotate(
           cmd_vel,
           limits.getAccLimits(),
@@ -287,7 +298,12 @@ namespace dwa_local_planner {
           current_pose_,
           boost::bind(&DWAPlanner::checkTrajectory, dp_, _1, _2, _3));
     } else {
+      // ros::WallTime time1_temp = ros::WallTime::now();
+
       bool isOk = dwaComputeVelocityCommands(current_pose_, cmd_vel);
+      // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
+      // ROS_INFO("DWA computeVelocityCommands time: %.9f\n", time2_temp.toSec());
+
       if (isOk) {
         publishGlobalPlan(transformed_plan);
       } else {
