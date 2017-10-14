@@ -126,10 +126,10 @@ void VoxelLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, 
   std::vector<Observation> observations, clearing_observations;
 
   // get the marking observations
-  current = getMarkingObservations(observations) && current;
+  current = current && getMarkingObservations(observations);
 
   // get the clearing observations
-  current = getClearingObservations(clearing_observations) && current;
+  current = current && getClearingObservations(clearing_observations);
 
   // update the global current status
   current_ = current;

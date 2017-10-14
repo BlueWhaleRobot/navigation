@@ -179,8 +179,8 @@ private:
     return layered_costmap_->getCostmap()->cellDistance(world_dist);
   }
 
-  inline void enqueue(unsigned int index, unsigned int mx, unsigned int my,
-                      unsigned int src_x, unsigned int src_y);
+  inline void enqueue(unsigned char* grid, unsigned int index, unsigned int mx, unsigned int my, unsigned int src_x,
+                      unsigned int src_y);
 
   double inflation_radius_, inscribed_radius_, weight_;
   unsigned int cell_inflation_radius_;
@@ -194,7 +194,6 @@ private:
 
   unsigned char** cached_costs_;
   double** cached_distances_;
-  double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
 
   dynamic_reconfigure::Server<costmap_2d::InflationPluginConfig> *dsrv_;
   void reconfigureCB(costmap_2d::InflationPluginConfig &config, uint32_t level);

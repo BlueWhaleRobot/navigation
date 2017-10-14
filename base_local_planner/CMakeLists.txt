@@ -10,6 +10,7 @@ find_package(catkin REQUIRED
             dynamic_reconfigure
             nav_core
             pcl_conversions
+            rostest
             costmap_2d
             pluginlib
             angles
@@ -127,7 +128,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if(CATKIN_ENABLE_TESTING)
-  find_package(rostest)
   catkin_add_gtest(base_local_planner_utest
     test/gtest_main.cpp
     test/utest.cpp

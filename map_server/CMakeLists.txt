@@ -84,7 +84,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE)
 
-
 ## Install excutable python script
 install( 
     PROGRAMS
