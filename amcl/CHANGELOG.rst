@@ -2,6 +2,40 @@
 Changelog for package amcl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.14.2 (2017-08-14)
+-------------------
+
+1.14.1 (2017-08-07)
+-------------------
+* Reference Issue `#592 <https://github.com/ros-planning/navigation/issues/592>`_ Added warning to AMCL when map is published on ... (`#604 <https://github.com/ros-planning/navigation/issues/604>`_)
+* recompute cluster stat when force_publication
+* Fix CMakeLists + package.xmls (`#548 <https://github.com/ros-planning/navigation/issues/548>`_)
+* amcl: fix compilation with gcc v7
+* Added deps to amcl costmap_2d move_base (`#512 <https://github.com/ros-planning/navigation/issues/512>`_)
+* fix order of parameters (closes `#553 <https://github.com/ros-planning/navigation/issues/553>`_)
+* Fix potential string overflow and resource leak
+* Contributors: Dmitry Rozhkov, Laurent GEORGE, Martin Günther, Michael Ferguson, Peter Harliman Liem, mryellow, vik748
+
+1.14.0 (2016-05-20)
+-------------------
+* Allow AMCL to run from bag file to allow very fast testing.
+* Fixes interpretation of a delayed initialpose message (see `#424 <https://github.com/ros-planning/navigation/issues/424>`_).
+  The tf lookup as it was before this change was very likely to fail as
+  ros::Time::now() was used to look up a tf without waiting on the tf's
+  availability. Additionally, the computation of the "new pose" by
+  multiplying the delta that the robot moved from the initialpose's
+  timestamp to ros::Time::now() was wrong. That delta has to by multiplied
+  from the right to the "old pose".
+  This commit also changes the reference frame to look up this delta to be
+  the odom frame as this one is supposed to be smooth and therefore the
+  best reference to get relative robot motion in the robot (base link) frame.
+* New unit test for proper interpretation of a delayed initialpose message.
+  Modifies the set_pose.py script to be able to send an initial pose with
+  a user defined time stamp at a user defined time. Adds a rostest to
+  exercise this new option.
+  This reveals the issues mentioned in `#424 <https://github.com/ros-planning/navigation/issues/424>`_ (the new test fails).
+* Contributors: Derek King, Stephan Wirth
+
 1.13.1 (2015-10-29)
 -------------------
 * adds the set_map service to amcl
