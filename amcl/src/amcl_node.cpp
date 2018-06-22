@@ -37,7 +37,7 @@
 #include "amcl/sensors/amcl_odom.h"
 #include "amcl/sensors/amcl_laser.h"
 
-#include "ros/assert.h"
+#include "ros/assert.h"x
 
 // roscpp
 #include "ros/ros.h"

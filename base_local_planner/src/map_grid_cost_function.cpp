@@ -57,13 +57,21 @@ void MapGridCostFunction::setTargetPoses(std::vector<geometry_msgs::PoseStamped>
 }
 
 bool MapGridCostFunction::prepare() {
+  // ros::WallTime time1_temp = ros::WallTime::now();
+
   map_.resetPathDist();
+  // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
+  // ROS_INFO("findBestTrajectory time: %.9f\n", time2_temp.toSec());
 
   if (is_local_goal_function_) {
     map_.setLocalGoal(*costmap_, target_poses_);
   } else {
     map_.setTargetCells(*costmap_, target_poses_);
   }
+
+  // time2_temp = ros::WallTime::now() - time1_temp;
+  // ROS_INFO("findBestTrajectory time: %.9f\n", time2_temp.toSec());
+  //
   return true;
 }
 

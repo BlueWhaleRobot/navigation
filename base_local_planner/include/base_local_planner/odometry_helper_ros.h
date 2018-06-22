@@ -74,7 +74,10 @@ public:
 
   /** @brief Return the current odometry topic. */
   std::string getOdomTopic() const { return odom_topic_; }
-
+  bool getOdomStatus()
+  {
+    return odom_ready_;
+  }
 private:
   //odom topic
   std::string odom_topic_;
@@ -85,6 +88,7 @@ private:
   boost::mutex odom_mutex_;
   // global tf frame id
   std::string frame_id_; ///< The frame_id associated this data
+  bool odom_ready_;
 };
 
 } /* namespace base_local_planner */
