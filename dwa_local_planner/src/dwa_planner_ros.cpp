@@ -301,15 +301,14 @@ namespace dwa_local_planner {
     } else {
       // ros::WallTime time1_temp = ros::WallTime::now();
       //如果新make_plan后，机器人需要先原地旋转对准跑道
-      bool isOk = false;
-      if(get_new_plan_flag_)
+      bool isOk  = dwaComputeVelocityCommands(current_pose_, cmd_vel);
+      if(get_new_plan_flag_ && isOk)
       {
         //计算当前角度和跑道角度
         float pose_theta,path_theta;
         if(transformed_plan.size()<2)
         {
           get_new_plan_flag_ = false;
-          isOk = false;
         }
         else
         {
@@ -336,16 +335,13 @@ namespace dwa_local_planner {
               cmd_vel.linear.y = 0.0;
               cmd_vel.angular.z = -0.4;
             }
-            isOk = true;
           }
           else
           {
             get_new_plan_flag_ = false;
-            isOk = false;
           }
         }
       }
-      if(!get_new_plan_flag_)  isOk = dwaComputeVelocityCommands(current_pose_, cmd_vel);
 
       // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
       // ROS_INFO("DWA computeVelocityCommands time: %.9f\n", time2_temp.toSec());
