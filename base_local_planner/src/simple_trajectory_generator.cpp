@@ -209,7 +209,7 @@ bool SimpleTrajectoryGenerator::generateTrajectory(
   // make sure that the robot would at least be moving with one of
   // the required minimum velocities for translation and rotation (if set)
 
-  if ((limits_->min_trans_vel >= 0 && vmag + eps < limits_->min_trans_vel) &&
+  if ((limits_->min_trans_vel >= 0 && vmag - eps < limits_->min_trans_vel) &&
       (limits_->min_rot_vel >= 0 && fabs(sample_target_vel[2]) + eps < limits_->min_rot_vel)) {
     return false;
   }
