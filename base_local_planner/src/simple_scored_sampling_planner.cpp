@@ -58,6 +58,7 @@ namespace base_local_planner {
       double cost = score_function_p->scoreTrajectory(traj);
       if (cost < 0) {
         ROS_DEBUG("Velocity %.3lf, %.3lf, %.3lf discarded by cost function  %d with cost: %f", traj.xv_, traj.yv_, traj.thetav_, gen_id, cost);
+        //if(fabs(traj.xv_)<0.04) ROS_INFO("Velocity %.3lf, %.3lf, %.3lf discarded by cost function  %d with cost: %f", traj.xv_, traj.yv_, traj.thetav_, gen_id, cost);
         traj_cost = cost;
         break;
       }
@@ -97,8 +98,6 @@ namespace base_local_planner {
       }
     }
 
-
-
     for (std::vector<TrajectorySampleGenerator*>::iterator loop_gen = gen_list_.begin(); loop_gen != gen_list_.end(); ++loop_gen) {
       count = 0;
       count_valid = 0;
@@ -114,7 +113,7 @@ namespace base_local_planner {
           loop_traj.cost_ = loop_traj_cost;
           all_explored->push_back(loop_traj);
         }
-
+        //if(fabs(loop_traj.xv_)<0.04) ROS_INFO("oups current %f %f %f\n",loop_traj.xv_ ,loop_traj.thetav_,loop_traj.cost_ );
         if (loop_traj_cost >= 0) {
           count_valid++;
           if (best_traj_cost < 0 || loop_traj_cost < best_traj_cost) {
@@ -139,6 +138,7 @@ namespace base_local_planner {
           best_traj.getPoint(i, px, py, pth);
           traj.addPoint(px, py, pth);
         }
+        // ROS_INFO("oups best_traj %f %f %f\n",traj.xv_ ,traj.thetav_,traj.cost_ );
       }
       // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
       // ROS_INFO("findBestTrajectory time: %.9f\n", time2_temp.toSec());

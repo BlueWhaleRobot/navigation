@@ -319,7 +319,9 @@ namespace dwa_local_planner {
     std::vector<base_local_planner::Trajectory> all_explored;
 
     // ros::WallTime time1_temp = ros::WallTime::now();
+
     scored_sampling_planner_.findBestTrajectory(result_traj_, &all_explored);
+
     // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
     // ROS_INFO("findBestTrajectory time: %.9f\n", time2_temp.toSec());
 

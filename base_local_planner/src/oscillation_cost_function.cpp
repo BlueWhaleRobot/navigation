@@ -38,6 +38,7 @@
 #include <base_local_planner/oscillation_cost_function.h>
 
 #include <cmath>
+#include <ros/console.h>
 
 namespace base_local_planner {
 
@@ -58,6 +59,7 @@ void OscillationCostFunction::updateOscillationFlags(Eigen::Vector3f pos, base_l
     if (setOscillationFlags(traj, min_vel_trans)) {
       prev_stationary_pos_ = pos;
     }
+
     //if we've got restrictions... check if we can reset any oscillation flags
     if(forward_pos_only_ || forward_neg_only_
         || strafe_pos_only_ || strafe_neg_only_
@@ -150,6 +152,7 @@ bool OscillationCostFunction::setOscillationFlags(base_local_planner::Trajectory
       rotating_neg_ = true;
     }
 
+
     //check positive rotation
     if (t->thetav_ > 0) {
       if (rotating_neg_) {
@@ -159,6 +162,7 @@ bool OscillationCostFunction::setOscillationFlags(base_local_planner::Trajectory
       rotating_neg_ = false;
       rotating_pos_ = true;
     }
+
   }
   return flag_set;
 }
