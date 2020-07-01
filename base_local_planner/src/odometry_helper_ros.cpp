@@ -43,17 +43,29 @@ namespace base_local_planner {
 
 OdometryHelperRos::OdometryHelperRos(std::string odom_topic) {
   setOdomTopic( odom_topic );
+  boost::mutex::scoped_lock lock(odom_mutex_);
+  odom_ready_=false;
 }
 
 void OdometryHelperRos::odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
-    ROS_INFO_ONCE("odom received!");
+    ROS_INFO_ONCE("odom received! %f,%f\n",msg->pose.pose.position.x,msg->pose.pose.position.y);
 
   //we assume that the odometry is published in the frame of the base
   boost::mutex::scoped_lock lock(odom_mutex_);
+
+  base_odom_.header.stamp = msg->header.stamp;
+  base_odom_.header.frame_id = msg->header.frame_id;
+  base_odom_.pose.pose.position.x = msg->pose.pose.position.x;
+  base_odom_.pose.pose.position.y = msg->pose.pose.position.y;
+  base_odom_.pose.pose.position.z = msg->pose.pose.position.z;
+  base_odom_.pose.pose.orientation = msg->pose.pose.orientation;
+
   base_odom_.twist.twist.linear.x = msg->twist.twist.linear.x;
   base_odom_.twist.twist.linear.y = msg->twist.twist.linear.y;
   base_odom_.twist.twist.angular.z = msg->twist.twist.angular.z;
   base_odom_.child_frame_id = msg->child_frame_id;
+
+  odom_ready_=true;
 //  ROS_DEBUG_NAMED("dwa_local_planner", "In the odometry callback with velocity values: (%.2f, %.2f, %.2f)",
 //      base_odom_.twist.twist.linear.x, base_odom_.twist.twist.linear.y, base_odom_.twist.twist.angular.z);
 }

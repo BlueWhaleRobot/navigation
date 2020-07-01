@@ -148,6 +148,7 @@ namespace dwa_local_planner {
     latchedStopRotateController_.resetLatching();
 
     ROS_INFO("Got new plan");
+    get_new_plan_flag_ = true;
     return dp_->setPlan(orig_global_plan);
   }
 
@@ -299,7 +300,53 @@ namespace dwa_local_planner {
           current_pose_,
           boost::bind(&DWAPlanner::checkTrajectory, dp_, _1, _2, _3));
     } else {
-      bool isOk = dwaComputeVelocityCommands(current_pose_, cmd_vel);
+      // ros::WallTime time1_temp = ros::WallTime::now();
+      //如果新make_plan后，机器人需要先原地旋转对准跑道
+      bool isOk  = dwaComputeVelocityCommands(current_pose_, cmd_vel);
+      if(get_new_plan_flag_ && isOk)
+      {
+        //计算当前角度和跑道角度
+        float pose_theta,path_theta;
+        if(transformed_plan.size()<2)
+        {
+          get_new_plan_flag_ = false;
+        }
+        else
+        {
+          pose_theta = tf2::getYaw(current_pose_.pose.orientation);
+          if(pose_theta<0) path_theta += 2*3.1415926;
+          path_theta = atan2(transformed_plan[1].pose.position.y - transformed_plan[0].pose.position.y,transformed_plan[1].pose.position.x - transformed_plan[0].pose.position.x);
+          if(path_theta<0) path_theta += 2*3.1415926;
+          //ROS_INFO("pose_theta %f path_theta %f",pose_theta,path_theta);
+          float goal_front_cost_temp = ( path_theta - pose_theta);
+
+          if(goal_front_cost_temp<-3.1415926) goal_front_cost_temp += 2*3.1415926 ;
+          if(goal_front_cost_temp>3.1415926) goal_front_cost_temp -= 2*3.1415926 ;
+          if(fabs(goal_front_cost_temp)> (3.1415926/2.0))
+          {
+            if(goal_front_cost_temp>0)
+            {
+              cmd_vel.linear.x = 0.0;
+              cmd_vel.linear.y = 0.0;
+              cmd_vel.angular.z = 0.4;
+            }
+            else
+            {
+              cmd_vel.linear.x = 0.0;
+              cmd_vel.linear.y = 0.0;
+              cmd_vel.angular.z = -0.4;
+            }
+          }
+          else
+          {
+            get_new_plan_flag_ = false;
+          }
+        }
+      }
+
+      // ros::WallDuration time2_temp = ros::WallTime::now() - time1_temp;
+      // ROS_INFO("DWA computeVelocityCommands time: %.9f\n", time2_temp.toSec());
+
       if (isOk) {
         publishGlobalPlan(transformed_plan);
       } else {
