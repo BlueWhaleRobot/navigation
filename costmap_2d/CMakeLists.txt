@@ -118,22 +118,22 @@ add_dependencies(costmap_2d costmap_2d_gencfg)
 add_dependencies(layers costmap_2d_gencfg)
 add_dependencies(costmap_2d costmap_2d_gencpp)
 
-add_executable(costmap_2d_markers src/costmap_2d_markers.cpp)
-add_dependencies(costmap_2d_markers visualization_msgs_gencpp)
-target_link_libraries(costmap_2d_markers
-    costmap_2d
-    )
+# add_executable(costmap_2d_markers src/costmap_2d_markers.cpp)
+# add_dependencies(costmap_2d_markers visualization_msgs_gencpp)
+# target_link_libraries(costmap_2d_markers
+#     costmap_2d
+#     )
 
-add_executable(costmap_2d_cloud src/costmap_2d_cloud.cpp)
-add_dependencies(costmap_2d_cloud sensor_msgs_gencpp)
-target_link_libraries(costmap_2d_cloud
-    costmap_2d
-    )
+# add_executable(costmap_2d_cloud src/costmap_2d_cloud.cpp)
+# add_dependencies(costmap_2d_cloud sensor_msgs_gencpp)
+# target_link_libraries(costmap_2d_cloud
+#     costmap_2d
+#     )
 
-add_executable(costmap_2d_node src/costmap_2d_node.cpp)
-target_link_libraries(costmap_2d_node
-    costmap_2d
-    )
+# add_executable(costmap_2d_node src/costmap_2d_node.cpp)
+# target_link_libraries(costmap_2d_node
+#     costmap_2d
+#     )
 
 ## Configure Tests
 if(CATKIN_ENABLE_TESTING)
@@ -186,12 +186,12 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(array_parser_test costmap_2d)
 endif()
 
-install( TARGETS
-    costmap_2d_markers
-    costmap_2d_cloud
-    costmap_2d_node
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# install( TARGETS
+#     costmap_2d_markers
+#     costmap_2d_cloud
+#     costmap_2d_node
+#     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 install(TARGETS
     costmap_2d
